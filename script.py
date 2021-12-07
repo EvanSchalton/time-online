@@ -36,7 +36,11 @@ def csv_gen(url: str):
 
 
 def download_data(
-    root_url: str, files: List[str], key: str = "user_id", pivot: str = "path"
+    root_url: str,
+    files: List[str],
+    key: str = "user_id",
+    pivot: str = "path",
+    target: str = "length",
 ):
     """
     Downloads all of the given files (assumes same format) and
@@ -51,7 +55,7 @@ def download_data(
             unqiue_pivots.add(data[pivot])
             results.setdefault(int(data[key]), defaultdict(lambda: 0))[
                 data[pivot]
-            ] += int(data["length"])
+            ] += int(data[target])
 
     sorted_pivots = list(unqiue_pivots)
     sorted_pivots.sort()
@@ -82,18 +86,33 @@ def save_data(
 
 
 def default_input(label, default_value):
+    """
+    Utiltiy function to provide a default value to the built-in input
+    """
     response = input(f"{label} [{default_value}]: ")
     response = response or default_value
     return response
 
 
-if __name__ == "__main__":
+def main():
+    """
+    Control function with the script is invoked directly
+    """
     root_url = default_input(
         "Root URL", "https://public.wiwdata.com/engineering-challenge/data"
     )
     files_string = default_input("CSV Files", DEFAULT_FILES)
     files = [f.strip() for f in files_string.split(",")]
     output_file = default_input("Save As", "results.csv")
+    key = default_input("Key", "user_id")
+    pivot = default_input("Pivot", "path")
+    target = default_input("Target", "length")
 
-    downloads = download_data(root_url, files)
-    save_data(downloads["results"], downloads["pivots"], output_file)
+    downloads = download_data(
+        root_url=root_url, files=files, key=key, pivot=pivot, target=target
+    )
+    save_data(downloads["results"], downloads["pivots"], output_file, key=key)
+
+
+if __name__ == "__main__":
+    main()
